@@ -16,7 +16,12 @@ convertButton.onclick = function(){
         reader.addEventListener( 'load', function ( event ) {
             var font = opentype.parse(event.target.result);
             var result = convert(font);
-            exportString(result,font.familyName + "_" + font.styleName + ( filetypeJson.checked ? ".json" : ".js" ) );
+            if (font.familyName != undefined && font.styleName != undefined) {
+                exportString(result,font.familyName + "_" + font.styleName + ( filetypeJson.checked ? ".json" : ".js" ) );
+            } else {
+                exportString(result,file.name.substring(0, file.name.lastIndexOf('.')) + ( filetypeJson.checked ? ".json" : ".js" ) );
+            }
+
         }, false );
         reader.readAsArrayBuffer( file );
     });
@@ -48,7 +53,6 @@ var exportString = function ( output, filename ) {
 
 var convert = function(font){
 
-    console.log(font);
 
     var scale = (1000 * 100) / ( (font.unitsPerEm || 2048) *72);
     var result = {};
@@ -73,7 +77,7 @@ var convert = function(font){
 		}
 	}
 	
-    font.glyphs.forEach(function(glyph){
+    Object.values(font.glyphs.glyphs).forEach(function(glyph){
         if (glyph.unicode !== undefined) {
 			var glyphCharacter = String.fromCharCode (glyph.unicode);
 			var needToExport = true;
@@ -130,17 +134,19 @@ var convert = function(font){
     };
     result.resolution = 1000;
     result.original_font_information = font.tables.name;
-    if (font.styleName.toLowerCase().indexOf("bold") > -1){
-        result.cssFontWeight = "bold";
-    } else {
-        result.cssFontWeight = "normal";
-    };
+    if (font.styleName != undefined) {
+        if (font.styleName.toLowerCase().indexOf("bold") > -1){
+            result.cssFontWeight = "bold";
+        } else {
+            result.cssFontWeight = "normal";
+        };
 
-    if (font.styleName.toLowerCase().indexOf("italic") > -1){
-        result.cssFontStyle = "italic";
-    } else {
-        result.cssFontStyle = "normal";
-    };
+        if (font.styleName.toLowerCase().indexOf("italic") > -1){
+            result.cssFontStyle = "italic";
+        } else {
+            result.cssFontStyle = "normal";
+        };
+    }
 
     if(filetypeJson.checked) {
         return JSON.stringify(result);
