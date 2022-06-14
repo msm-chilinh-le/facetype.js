@@ -13,7 +13,7 @@ convertButton.onclick = function(){
 
     [].forEach.call(fileInput.files,function(file){
         var reader = new FileReader();
-        reader.addEventListener( 'load', function ( event ) {
+        reader.addEventListener('load', function ( event ) {
             var font = opentype.parse(event.target.result);
             var result = convert(font);
             if (font.familyName != undefined && font.styleName != undefined) {
@@ -79,7 +79,7 @@ var convert = function(font){
 	
     Object.values(font.glyphs.glyphs).forEach(function(glyph){
         if (glyph.unicode !== undefined) {
-			var glyphCharacter = String.fromCharCode (glyph.unicode);
+			var glyphCharacter = String.fromCharCode(glyph.unicode);
 			var needToExport = true;
 			if (restriction.range !== null) {
 				needToExport = (glyph.unicode >= restriction.range[0] && glyph.unicode <= restriction.range[1]);
@@ -117,7 +117,10 @@ var convert = function(font){
 						token.o += " "
 					}
 				});
-				result.glyphs[String.fromCharCode(glyph.unicode)] = token;
+
+                glyph.unicodes.forEach(u => {
+                    result.glyphs[String.fromCharCode(u)] = token;
+                });
 			}
         };
     });
